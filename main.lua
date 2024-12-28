@@ -2,9 +2,29 @@ local ARGS = {...}
 
 local VERSION = "0.1a"
 local HOME_DIR = "/quarry/"
+local LIB_DIR = HOME_DIR .. "lib/"
 local DATA_FILE = HOME_DIR .. "data"
 local TURTLE_PROGRAM = HOME_DIR .. "turtle.lua"
 local CONSOLE_PROGRAM = HOME_DIR .. "console.lua"
+
+local function addDependencies()
+    if not fs.exists(HOME_DIR) then
+        fs.makeDir(HOME_DIR)
+    end
+
+
+    if not fs.exists(LIB_DIR) then
+        fs.makeDir(LIB_DIR)
+    end
+
+    if not fs.exists("/quarry/lib/customTabulate.lua") then
+        shell.run("wget", "https://raw.githubusercontent.com/Ether0p12348/ComputerCraft_Quarry/refs/heads/main/lib/customTabulate.lua", "/quarry/lib/customTabulate.lua")
+    end
+end
+
+addDependencies()
+
+local ctext = require("/quarry/lib/customTabulate.lua")
 
 local function SCRIPT_NAME()
     local fullPath = shell.getRunningProgram()
@@ -66,18 +86,28 @@ local function saveData(tbl)
 end
 
 local function showHelp()
-    local rows = {
-        { "Usage: " .. SCRIPT_NAME() .. " <command> [args]" },
-        { "Commands:" },
-        { "  " .. SCRIPT_NAME() .. " <help, ?>", "->", "Show This Help Page" },
-        { "  " .. SCRIPT_NAME() .. " install turtle", "->", "Install Program for Mining Turtle" },
-        { "  " .. SCRIPT_NAME() .. " install console", "->", "Install Program for Console Computer" },
-        { "  " .. SCRIPT_NAME() .. " update", "->", "Check and Install Updates" },
-        { "  " .. SCRIPT_NAME() .. " start --skipUpdate", "->", "Start a Job\n  --skipUpdate option will skip the auto update." }
-    }
+    textutils.pagedTabulate(
+        {"Usage: " .. SCRIPT_NAME() .. "<command> [args]"},
+        {"Commands:"},
+        {"  " .. SCRIPT_NAME() .. " <help, ?>", "->", "Show This Help Page"},
+        {"  " .. SCRIPT_NAME() .. " install turtle", "->", "Configure for Mining Turtle"},
+        {"  " .. SCRIPT_NAME() .. " install console", "->", "Configure for Console Computer"},
+        {"  " .. SCRIPT_NAME() .. " update", "->", "Check and Install Updates"},
+        {"  " .. SCRIPT_NAME() .. " start --skipUpdate", "->", "Start a Job (Optionally, skip update)"}
+    )
+    --local rows = {
+    --    { "Usage: " .. SCRIPT_NAME() .. " <command> [args]" },
+    --    { "Commands:" },
+    --    { "  " .. SCRIPT_NAME() .. " <help, ?>", "->", "Show This Help Page" },
+    --    { "  " .. SCRIPT_NAME() .. " install turtle", "->", "Install Program for Mining Turtle" },
+    --    { "  " .. SCRIPT_NAME() .. " install console", "->", "Install Program for Console Computer" },
+    --    { "  " .. SCRIPT_NAME() .. " update", "->", "Check and Install Updates" },
+    --    { "  " .. SCRIPT_NAME() .. " start --skipUpdate", "->", "Start a Job (Optionally, skip update)" }
+    --}
 
-    textutils.pagedTabulate(table.unpack(rows))
+    --textutils.tabulate(rows)
 end
+
 
 local function install(v)
     if v == "turtle" or v == "console" or v == "main" then
@@ -88,7 +118,7 @@ local function install(v)
             path = CONSOLE_PROGRAM
         elseif v == "main" then
             path = shell.getRunningProgram()
-            fs.delete(path)
+            --fs.delete(path)
         else
             error("Something went wrong.", 1)
         end
